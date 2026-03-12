@@ -29,8 +29,6 @@ export async function POST(req: NextRequest) {
     const bytes = await imageFile.arrayBuffer();
     const base64 = Buffer.from(bytes).toString("base64");
 
-    // Build payload expected by your chosen HF model.
-    // Many image-to-video models accept a base64 image + optional prompt.
     const payload = {
       inputs: {
         image: base64,
@@ -61,10 +59,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Many video models return binary video data.
     const arrayBuffer = await hfResponse.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
+    const videoBase64 = buffer.toString("base64");
+    const videoMimeType = "video/mp4";
 
-    // You can either:
-    // A) Return a blob URL from storage after upload (recommended long term), or
-    // B) Return base64 video and create a blob URL on
+    return NextResponse.json({
+      videoUrl: `${videoMimeType};base64,${videoBase64}`,
+    });
+  } catch (error: any) {
+    const msg = error?.message || "Generation failed";
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
+}
