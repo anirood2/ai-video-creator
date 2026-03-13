@@ -48,16 +48,19 @@ export async function POST(req: NextRequest) {
       }
     );
 
-    if (!hfResponse.ok) {
+        if (!hfResponse.ok) {
       const text = await hfResponse.text();
+      console.error("HF error:", text); // safe on server
+
       return NextResponse.json(
         {
           error: "Generation failed with Hugging Face",
-          detail: text,
+          detail: text,   // <— expose detail
         },
         { status: 500 }
       );
     }
+
 
     const arrayBuffer = await hfResponse.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
